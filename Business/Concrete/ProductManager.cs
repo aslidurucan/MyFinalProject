@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using DataAccess.Abstract;
 using Entities.DTOs;
+using Core.Utilities.Results;
+using Business.Constants;
 
 namespace Business.Concrete
 {
@@ -18,15 +20,31 @@ namespace Business.Concrete
             _productDal = productDal;
         }
 
-         public List<Product> GetAll()
+        public IResult Add(Product product)
+        {
+            if(product.ProductName.Length < 2)
+            {
+                return new ErrorResult(Messages.ProductNameInvalid);
+            }
+
+            _productDal.Add(product);
+            return new SuccessResult(Messages.ProductAdded);
+        }
+
+        public IDataResult<List<Product>> GetAll()
         {
             //iş Kodları
-            return _productDal.GetAll();
+            return new DataResult<List<Product>>(_productDal.GetAll(), true,"Ürünler listelendi");
         }
 
         public List<Product> GetAllByCategoryId(int id)
         {
             return  _productDal.GetAll(p => p.CategoryId == id);
+        }
+
+        public Product GetById(int productId)
+        {
+            return _productDal.Get(p => p.ProductId == productId);
         }
 
         public List<Product> GetByUnitPrice(decimal min, decimal max)
